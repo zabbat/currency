@@ -9,9 +9,10 @@ import android.view.MenuItem;
 
 import net.wandroid.badooconvert.json.Transaction;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements ProductFragment.IProductFragmentListener{
+public class MainActivity extends AppCompatActivity implements ProductFragment.IProductFragmentListener {
 
     public static final String TAG_MAIN_FRAG = "TAG_MAIN_FRAG";
 
@@ -23,8 +24,8 @@ public class MainActivity extends AppCompatActivity implements ProductFragment.I
         setSupportActionBar(toolbar);
         ProductFragment fragment = ProductFragment.newInstance();
         FragmentManager manager = getSupportFragmentManager();
-        manager.beginTransaction().addToBackStack("product").replace(R.id.main_frag_container, fragment, TAG_MAIN_FRAG).commit();
-
+        manager.beginTransaction().replace(R.id.main_frag_container, fragment, TAG_MAIN_FRAG).addToBackStack("product").commit();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
     }
 
     @Override
@@ -50,9 +51,24 @@ public class MainActivity extends AppCompatActivity implements ProductFragment.I
     }
 
     @Override
-    public void onItemClicked(String sku, List<Transaction> transactions) {
-        CurrencyFragment fragment = CurrencyFragment.newInstance();
+    public void onItemClicked(String sku, ArrayList<Transaction> transactions) {
+        CurrencyFragment fragment = CurrencyFragment.newInstance(sku,transactions);
         FragmentManager manager = getSupportFragmentManager();
-        manager.beginTransaction().addToBackStack("currency").replace(R.id.main_frag_container, fragment, TAG_MAIN_FRAG).commit();
+        manager.beginTransaction().replace(R.id.main_frag_container, fragment, TAG_MAIN_FRAG).addToBackStack("currency").commit();
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    public boolean onSupportNavigateUp() {
+
+        FragmentManager manager = getSupportFragmentManager();
+        if (manager.getBackStackEntryCount() <= 1) {
+            //onBackPressed();
+            getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+            return super.onSupportNavigateUp();
+        } else {
+            manager.popBackStack();
+            return true;
+        }
     }
 }

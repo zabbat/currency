@@ -37,7 +37,7 @@ public class ProductFragment extends Fragment {
 
     private ListView mProductListView;
     private ListAdapter mListAdapter;
-    private Map<String, List<Transaction>> mTransactionMap = new HashMap<>();
+    private Map<String, ArrayList<Transaction>> mTransactionMap = new HashMap<>();
     private IProductFragmentListener mProductFragmentListener;
 
     public ProductFragment() {
@@ -98,7 +98,7 @@ public class ProductFragment extends Fragment {
 
         if (transactions != null) {
             mTransactionMap = new HashMap<>();
-            List transactionList = null;
+            ArrayList<Transaction> transactionList = null;
             for (Transaction t : transactions) {
                 if (mTransactionMap.containsKey(t.getSku())) {
                     transactionList = mTransactionMap.get(t.getSku());
@@ -141,6 +141,6 @@ public class ProductFragment extends Fragment {
     }
 
     public interface IProductFragmentListener {
-        void onItemClicked(String sku, List<Transaction> transactions);
+        void onItemClicked(String sku, ArrayList<Transaction> transactions);
     }
 }
