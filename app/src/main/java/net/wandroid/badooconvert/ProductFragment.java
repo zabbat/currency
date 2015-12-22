@@ -1,5 +1,6 @@
 package net.wandroid.badooconvert;
 
+import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -42,6 +43,10 @@ public class ProductFragment extends Fragment {
     public ProductFragment() {
     }
 
+    public static ProductFragment newInstance() {
+        return new ProductFragment();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -61,12 +66,26 @@ public class ProductFragment extends Fragment {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 Map<String, String> productMap = (Map<String, String>) mListAdapter.getItem(position);
-                if(mProductFragmentListener!=null){
-                    String sku=productMap.get(SKU);
-                    mProductFragmentListener.onItemClicked(sku,mTransactionMap.get(sku));
+                if (mProductFragmentListener != null) {
+                    String sku = productMap.get(SKU);
+                    mProductFragmentListener.onItemClicked(sku, mTransactionMap.get(sku));
                 }
             }
         });
+    }
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof IProductFragmentListener) {
+            mProductFragmentListener = (IProductFragmentListener) context;
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        mProductFragmentListener = null;
+        super.onDetach();
     }
 
     private SimpleAdapter getAdapter() {

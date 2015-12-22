@@ -15,6 +15,10 @@ public class CurrencyFragment extends Fragment {
     }
 
 
+    public static CurrencyFragment newInstance() {
+        return new CurrencyFragment();
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
