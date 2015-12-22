@@ -6,13 +6,14 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.SimpleAdapter;
 
 import com.google.gson.Gson;
 
-import net.wandroid.badooconvert.json.Product;
+import net.wandroid.badooconvert.json.Transaction;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -30,8 +31,13 @@ import java.util.Map;
 public class ProductFragment extends Fragment {
 
     public static final String FIRST_SET_TRANSACTIONS_JSON = "first_set/transactions.json";
+    public static final String NR_TRANSACTIONS = "nrTransactions";
+    public static final String SKU = "sku";
+
     private ListView mProductListView;
     private ListAdapter mListAdapter;
+    private Map<String, List<Transaction>> mTransactionMap = new HashMap<>();
+    private IProductFragmentListener mProductFragmentListener;
 
     public ProductFragment() {
     }
@@ -51,44 +57,71 @@ public class ProductFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         mListAdapter = getAdapter();
         mProductListView.setAdapter(mListAdapter);
+        mProductListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Map<String, String> productMap = (Map<String, String>) mListAdapter.getItem(position);
+                if(mProductFragmentListener!=null){
+                    String sku=productMap.get(SKU);
+                    mProductFragmentListener.onItemClicked(sku,mTransactionMap.get(sku));
+                }
+            }
+        });
     }
 
     private SimpleAdapter getAdapter() {
-        List<Product> products = null;
+        List<Transaction> transactions = null;
         try {
-            products = Arrays.asList(loadJsonFromFile(FIRST_SET_TRANSACTIONS_JSON, getActivity().getAssets()));
+            transactions = Arrays.asList(loadJsonFromFile(FIRST_SET_TRANSACTIONS_JSON, getActivity().getAssets()));
         } catch (IOException e) {
             e.printStackTrace();
         }
 
-        ArrayList<Map<String, String>> list = new ArrayList<>();
-        if (products != null) {
-            for (Product p : products) {
-                Map<String, String> map = new HashMap();
-                map.put(Product.SKU, p.getSku());
-                map.put(Product.AMOUNT, p.getAmount());
-                list.add(map);
+        if (transactions != null) {
+            mTransactionMap = new HashMap<>();
+            List transactionList = null;
+            for (Transaction t : transactions) {
+                if (mTransactionMap.containsKey(t.getSku())) {
+                    transactionList = mTransactionMap.get(t.getSku());
+                } else {
+                    transactionList = new ArrayList();
+                    mTransactionMap.put(t.getSku(), transactionList);
+                }
+                transactionList.add(t);
+
             }
         }
 
-        String[] from = new String[]{Product.SKU, Product.AMOUNT};
+        ArrayList<Map<String, String>> list = new ArrayList<>();
+        for (String key : mTransactionMap.keySet()) {
+            Map<String, String> map = new HashMap();
+            map.put(SKU, key);
+            map.put(NR_TRANSACTIONS, Integer.toString(mTransactionMap.get(key).size()));
+            list.add(map);
+        }
+
+        String[] from = new String[]{SKU, NR_TRANSACTIONS};
         int[] to = new int[]{android.R.id.text1, android.R.id.text2};
         SimpleAdapter adapter = new SimpleAdapter(getContext(), list, android.R.layout.simple_list_item_2, from, to);
         return adapter;
 
     }
 
-    private Product[] loadJsonFromFile(String path, AssetManager assetManager) throws IOException {
+    private Transaction[] loadJsonFromFile(String path, AssetManager assetManager) throws IOException {
         InputStream is = null;
         try {
             is = assetManager.open(path);
             Gson gson = new Gson();
-            Product[] products = gson.fromJson(new BufferedReader(new InputStreamReader(is)), Product[].class);
-            return products;
+            Transaction[] transactions = gson.fromJson(new BufferedReader(new InputStreamReader(is)), Transaction[].class);
+            return transactions;
         } finally {
             if (is != null) {
                 is.close();
             }
         }
+    }
+
+    public interface IProductFragmentListener {
+        void onItemClicked(String sku, List<Transaction> transactions);
     }
 }
