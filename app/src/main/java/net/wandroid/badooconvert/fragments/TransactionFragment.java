@@ -99,14 +99,19 @@ public class TransactionFragment extends Fragment {
     }
 
     /**
-     * Creates a SimpleAdapeter, filled with data parsed from json
+     * Creates a SimpleAdapter, filled with data parsed from json
+     * This will do calculations and read from file and should preferable be run from background
+     *
      * @param jsonPath the asset path. Example if you have a file in assets/a/b.json, then the path should be "a/b.json"
      * @return The adapter.
      */
     private SimpleAdapter getAdapter(String jsonPath) {
         List<Transaction> transactions = null;
         try {
-            transactions = Arrays.asList(loadJsonFromFile(jsonPath, getActivity().getAssets()));
+            Transaction[] tmp = loadJsonFromFile(jsonPath, getActivity().getAssets());
+            if (tmp != null) {
+                transactions = Arrays.asList(tmp);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -143,12 +148,15 @@ public class TransactionFragment extends Fragment {
 
     /**
      * Loads Transaction from json.
-     * @param path path to the file in the asset folder
+     *
+     * @param path         path to the file in the asset folder
      * @param assetManager assetManager
      * @return the Transactions. Can be null.
      * @throws IOException
      */
-    private @Nullable Transaction[] loadJsonFromFile(String path, AssetManager assetManager) throws IOException {
+    private
+    @Nullable
+    Transaction[] loadJsonFromFile(String path, AssetManager assetManager) throws IOException {
         InputStream is = null;
         try {
             is = assetManager.open(path);
@@ -163,12 +171,13 @@ public class TransactionFragment extends Fragment {
     }
 
     /**
-     * Interface to ineract with an Activity
+     * Interface to interact with an Activity
      */
     public interface IProductFragmentListener {
         /**
          * triggered when an item in the list is clicked.
-         * @param sku the sku of the transaction
+         *
+         * @param sku          the sku of the transaction
          * @param transactions all transactions for the sku as a list
          */
         void onItemClicked(String sku, ArrayList<Transaction> transactions);

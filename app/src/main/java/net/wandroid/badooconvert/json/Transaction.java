@@ -5,7 +5,7 @@ import java.io.Serializable;
 /**
  * Describes a transaction
  */
-public class Transaction implements Serializable{
+public class Transaction implements Serializable {
 
     /**
      * Sku of the product

@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,8 +27,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 public class CurrencyFragment extends Fragment {
@@ -189,8 +192,8 @@ public class CurrencyFragment extends Fragment {
 
     /**
      * Starts recursive depth first search for currency
-     *  Will throw IllegalArgumentException if there is no possible conversion
-     *  Same currency will always be converted to 1
+     * Will throw IllegalArgumentException if there is no possible conversion
+     * Same currency will always be converted to 1
      *
      * @param from from currency
      * @param to   to currency
@@ -200,25 +203,32 @@ public class CurrencyFragment extends Fragment {
         if (from.equals(to)) {
             return 1;
         }
-        return recursive(from, to, 1);
+        return recursive(from, to, 1, new HashSet<Pair<String, String>>());
     }
 
     /**
      * Recursive depth first method for finding the rate
      * Will throw illegalArgumentException if there is no possible conversion
      *
-     * @param from from currency
-     * @param to   to currency
-     * @param rate the rate
+     * @param from    from currency
+     * @param to      to currency
+     * @param rate    the rate
+     * @param visited set containing already visited conversions. This graph can be cyclic.
      * @return the rate
      */
-    private double recursive(String from, String to, double rate) {
+    private double recursive(String from, String to, double rate, Set<Pair<String, String>> visited) {
         Map<String, Double> toMap = mConvertNodeMap.get(from);
-        for (String key : toMap.keySet()) {
-            if (key.equals(to)) { //we are done
-                return toMap.get(key) * rate;
-            } else {
-                return recursive(key, to, rate * toMap.get(key));
+        if (toMap != null) {
+            for (String key : toMap.keySet()) {
+                if (visited.contains(new Pair<>(from, key))) { // already visited, skip.
+                    continue;
+                }
+                if (key.equals(to)) { //we are done
+                    return toMap.get(key) * rate;
+                } else {
+                    visited.add(new Pair<>(from, key));
+                    return recursive(key, to, rate * toMap.get(key), visited);
+                }
             }
         }
         throw new IllegalArgumentException("Could not convert " + from + "  to " + to);
