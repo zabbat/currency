@@ -3,15 +3,24 @@ package net.wandroid.badooconvert.json;
 import java.io.Serializable;
 
 /**
- * Created by zabbat on 2015-12-22.
+ * Describes a transaction
  */
 public class Transaction implements Serializable{
 
+    /**
+     * Sku of the product
+     */
     private String sku;
-    private String amount;
+    /**
+     * the amount of the product transacted
+     */
+    private double amount;
+    /**
+     * Currency used for this transaction (Ex USD)
+     */
     private String currency;
 
-    public Transaction(String sku, String amount, String currency) {
+    public Transaction(String sku, double amount, String currency) {
         this.sku = sku;
         this.amount = amount;
         this.currency = currency;
@@ -21,7 +30,7 @@ public class Transaction implements Serializable{
         return sku;
     }
 
-    public String getAmount() {
+    public double getAmount() {
         return amount;
     }
 

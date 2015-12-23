@@ -1,9 +1,11 @@
-package net.wandroid.badooconvert;
+package net.wandroid.badooconvert.fragments;
 
 import android.content.Context;
 import android.content.res.AssetManager;
 import android.os.Bundle;
+import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v7.app.AppCompatActivity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,6 +16,8 @@ import android.widget.SimpleAdapter;
 
 import com.google.gson.Gson;
 
+import net.wandroid.badooconvert.MainActivity;
+import net.wandroid.badooconvert.R;
 import net.wandroid.badooconvert.json.Transaction;
 
 import java.io.BufferedReader;
@@ -27,24 +31,27 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A placeholder fragment containing a simple view.
+ * A fragment that displays number transactions for all products
  */
-public class ProductFragment extends Fragment {
+public class TransactionFragment extends Fragment {
 
-    public static final String FIRST_SET_TRANSACTIONS_JSON = "first_set/transactions.json";
+
     public static final String NR_TRANSACTIONS = "nrTransactions";
     public static final String SKU = "sku";
 
     private ListView mProductListView;
     private ListAdapter mListAdapter;
+    /**
+     * Contains has of products as key and a list of transactions as value
+     */
     private Map<String, ArrayList<Transaction>> mTransactionMap = new HashMap<>();
     private IProductFragmentListener mProductFragmentListener;
 
-    public ProductFragment() {
+    public TransactionFragment() {
     }
 
-    public static ProductFragment newInstance() {
-        return new ProductFragment();
+    public static TransactionFragment newInstance() {
+        return new TransactionFragment();
     }
 
     @Override
@@ -60,7 +67,7 @@ public class ProductFragment extends Fragment {
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mListAdapter = getAdapter();
+        mListAdapter = getAdapter(MainActivity.DATA_SET_TRANSACTIONS_JSON);
         mProductListView.setAdapter(mListAdapter);
         mProductListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -72,6 +79,9 @@ public class ProductFragment extends Fragment {
                 }
             }
         });
+        AppCompatActivity activity = (AppCompatActivity) getActivity();
+        activity.getSupportActionBar().setTitle(R.string.app_name);
+        activity.getSupportActionBar().setDisplayHomeAsUpEnabled(false);
     }
 
     @Override
@@ -88,10 +98,15 @@ public class ProductFragment extends Fragment {
         super.onDetach();
     }
 
-    private SimpleAdapter getAdapter() {
+    /**
+     * Creates a SimpleAdapeter, filled with data parsed from json
+     * @param jsonPath the asset path. Example if you have a file in assets/a/b.json, then the path should be "a/b.json"
+     * @return The adapter.
+     */
+    private SimpleAdapter getAdapter(String jsonPath) {
         List<Transaction> transactions = null;
         try {
-            transactions = Arrays.asList(loadJsonFromFile(FIRST_SET_TRANSACTIONS_JSON, getActivity().getAssets()));
+            transactions = Arrays.asList(loadJsonFromFile(jsonPath, getActivity().getAssets()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -126,7 +141,14 @@ public class ProductFragment extends Fragment {
 
     }
 
-    private Transaction[] loadJsonFromFile(String path, AssetManager assetManager) throws IOException {
+    /**
+     * Loads Transaction from json.
+     * @param path path to the file in the asset folder
+     * @param assetManager assetManager
+     * @return the Transactions. Can be null.
+     * @throws IOException
+     */
+    private @Nullable Transaction[] loadJsonFromFile(String path, AssetManager assetManager) throws IOException {
         InputStream is = null;
         try {
             is = assetManager.open(path);
@@ -140,7 +162,15 @@ public class ProductFragment extends Fragment {
         }
     }
 
+    /**
+     * Interface to ineract with an Activity
+     */
     public interface IProductFragmentListener {
+        /**
+         * triggered when an item in the list is clicked.
+         * @param sku the sku of the transaction
+         * @param transactions all transactions for the sku as a list
+         */
         void onItemClicked(String sku, ArrayList<Transaction> transactions);
     }
 }

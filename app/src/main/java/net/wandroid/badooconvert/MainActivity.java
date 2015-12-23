@@ -7,14 +7,17 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import net.wandroid.badooconvert.fragments.CurrencyFragment;
+import net.wandroid.badooconvert.fragments.TransactionFragment;
 import net.wandroid.badooconvert.json.Transaction;
 
 import java.util.ArrayList;
-import java.util.List;
 
-public class MainActivity extends AppCompatActivity implements ProductFragment.IProductFragmentListener {
+public class MainActivity extends AppCompatActivity implements TransactionFragment.IProductFragmentListener {
 
     public static final String TAG_MAIN_FRAG = "TAG_MAIN_FRAG";
+    public static final String DATA_SET_TRANSACTIONS_JSON = "first_set/transactions.json";
+    public static final String DATA_SET_RATES_JSON = "first_set/rates.json";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,10 +25,13 @@ public class MainActivity extends AppCompatActivity implements ProductFragment.I
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        ProductFragment fragment = ProductFragment.newInstance();
+        TransactionFragment fragment = TransactionFragment.newInstance();
+
+        //show the transaction fragment
         FragmentManager manager = getSupportFragmentManager();
-        manager.beginTransaction().replace(R.id.main_frag_container, fragment, TAG_MAIN_FRAG).addToBackStack("product").commit();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(false);
+        if (manager.getBackStackEntryCount() == 0) {
+            manager.beginTransaction().replace(R.id.main_frag_container, fragment, TAG_MAIN_FRAG).addToBackStack("product").commit();
+        }
     }
 
     @Override
@@ -52,23 +58,22 @@ public class MainActivity extends AppCompatActivity implements ProductFragment.I
 
     @Override
     public void onItemClicked(String sku, ArrayList<Transaction> transactions) {
-        CurrencyFragment fragment = CurrencyFragment.newInstance(sku,transactions);
+        //Show the currency fragment
+        CurrencyFragment fragment = CurrencyFragment.newInstance(sku, transactions);
         FragmentManager manager = getSupportFragmentManager();
         manager.beginTransaction().replace(R.id.main_frag_container, fragment, TAG_MAIN_FRAG).addToBackStack("currency").commit();
-        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
     }
+
+
 
     @Override
     public boolean onSupportNavigateUp() {
 
         FragmentManager manager = getSupportFragmentManager();
-        if (manager.getBackStackEntryCount() <= 1) {
-            //onBackPressed();
+        if (manager.getBackStackEntryCount() <= 2) {
             getSupportActionBar().setDisplayHomeAsUpEnabled(false);
-            return super.onSupportNavigateUp();
-        } else {
-            manager.popBackStack();
-            return true;
         }
+        manager.popBackStack();
+        return true;
     }
 }

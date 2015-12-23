@@ -1,14 +1,24 @@
 package net.wandroid.badooconvert.json;
 
 /**
- * Created by zabbat on 2015-12-22.
+ * Describes a rate object
  */
 public class Rate {
+    /**
+     * From what currency (Ex USD)
+     */
     private String from;
+    /**
+     * To what currency (Ex GBP)
+     */
     private String to;
-    private String rate;
 
-    public Rate(String from, String to, String rate) {
+    /**
+     * At what rate
+     */
+    private double rate;
+
+    public Rate(String from, String to, double rate) {
         this.from = from;
         this.to = to;
         this.rate = rate;
@@ -22,7 +32,8 @@ public class Rate {
         return to;
     }
 
-    public String getRate() {
+    public double getRate() {
         return rate;
     }
+
 }
